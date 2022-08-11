@@ -123,9 +123,9 @@ async def skip(cli, message: Message, _, chat_id):
             await Yukki.skip_stream(chat_id, link, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
-        button = telegram_markup(_)
+        button = telegram_markup(_, chat_id)
         img = await gen_thumb(videoid)
-        await message.reply_photo(
+        run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
                 user,
@@ -133,6 +133,8 @@ async def skip(cli, message: Message, _, chat_id):
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
+        db[chat_id][0]["mystic"] = run
+        db[chat_id][0]["markup"] = "tg"
     elif "vid_" in queued:
         mystic = await message.reply_text(
             _["call_10"], disable_web_page_preview=True
@@ -150,9 +152,9 @@ async def skip(cli, message: Message, _, chat_id):
             await Yukki.skip_stream(chat_id, file_path, video=status)
         except Exception:
             return await mystic.edit_text(_["call_9"])
-        button = stream_markup(_, videoid)
+        button = stream_markup(_, videoid, chat_id)
         img = await gen_thumb(videoid)
-        await message.reply_photo(
+        run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
                 user,
@@ -160,26 +162,30 @@ async def skip(cli, message: Message, _, chat_id):
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
+        db[chat_id][0]["mystic"] = run
+        db[chat_id][0]["markup"] = "stream"
         await mystic.delete()
     elif "index_" in queued:
         try:
             await Yukki.skip_stream(chat_id, videoid, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
-        button = telegram_markup(_)
-        await message.reply_photo(
+        button = telegram_markup(_, chat_id)
+        run = await message.reply_photo(
             photo=config.STREAM_IMG_URL,
             caption=_["stream_2"].format(user),
             reply_markup=InlineKeyboardMarkup(button),
         )
+        db[chat_id][0]["mystic"] = run
+        db[chat_id][0]["markup"] = "tg"
     else:
         try:
             await Yukki.skip_stream(chat_id, queued, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         if videoid == "telegram":
-            button = telegram_markup(_)
-            await message.reply_photo(
+            button = telegram_markup(_, chat_id)
+            run = await message.reply_photo(
                 photo=config.TELEGRAM_AUDIO_URL
                 if str(streamtype) == "audio"
                 else config.TELEGRAM_VIDEO_URL,
@@ -188,9 +194,11 @@ async def skip(cli, message: Message, _, chat_id):
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "tg"
         elif videoid == "soundcloud":
-            button = telegram_markup(_)
-            await message.reply_photo(
+            button = telegram_markup(_, chat_id)
+            run = await message.reply_photo(
                 photo=config.SOUNCLOUD_IMG_URL
                 if str(streamtype) == "audio"
                 else config.TELEGRAM_VIDEO_URL,
@@ -199,10 +207,12 @@ async def skip(cli, message: Message, _, chat_id):
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "tg"
         else:
-            button = stream_markup(_, videoid)
+            button = stream_markup(_, videoid, chat_id)
             img = await gen_thumb(videoid)
-            await message.reply_photo(
+            run = await message.reply_photo(
                 photo=img,
                 caption=_["stream_1"].format(
                     user,
@@ -210,3 +220,5 @@ async def skip(cli, message: Message, _, chat_id):
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "stream"
